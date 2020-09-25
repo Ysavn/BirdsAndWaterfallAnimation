@@ -7,11 +7,7 @@ double COR = 0.2;
 double dt = 0.1;
 double v_max = 15;
 double grnd_height = 30;
-PImage img,
-rock_img,
-tree_img,
-water_img,
-arrow_img;
+PImage img, rock_img, tree_img, water_img, arrow_img;
 boolean shootArrow = false;
 boolean arrowActivated = false;
 float birdD = 24;
@@ -20,9 +16,7 @@ double arrowTheta;
 double arrowSpeed = 200;
 int winWidth = 640;
 int winHeight = 360;
-Map < Integer,
-Integer > waterfallBoarderDict = new HashMap < Integer,
-Integer > ();
+Map < Integer, Integer > waterfallBoarderDict = new HashMap < Integer, Integer > ();
 boolean waterfallBoarderFlag = true;
 public class Particle {
   Vec2 loc;
@@ -127,7 +121,7 @@ public class Particle {
     acc.add(randForce);
 
     //Danger (arrow) force
-    if (shootArrow) {
+    if (shootArrow || arrowActivated) {
       Vec2 dangerForce = new Vec2(0, 0);
       Vec2 distVec = new Vec2(loc.x - arrowPos.x, loc.y - arrowPos.y);
       Vec2 arrowVel = new Vec2(arrowSpeed * (double) Math.sin(arrowTheta), -arrowSpeed * (double) Math.cos(arrowTheta));
@@ -171,6 +165,7 @@ ArrayList < Particle > particles;
 ArrayList < WaterParticle > water_particles;
 
 void mousePressed() {
+  if(arrowActivated) return;
   boolean outOfBounds = false;
 
   if (waterfallBoarderFlag) {
@@ -208,6 +203,7 @@ boolean outsideWindow(Vec2 v) {
   if (v.x < 0 || v.x > width || v.y < 0 || v.y > height) return true;
   return false;
 }
+
 void update_arrow() {
 
   if (outsideWindow(arrowPos)) shootArrow = false;
@@ -242,6 +238,15 @@ void draw() {
   image(rock_img, 490, 350, 100, 40);
   image(rock_img, 600, 350, 100, 40);
   image(tree_img, 550, 210, 180, 360);
+  
+  if (arrowActivated || shootArrow) {
+    pushMatrix();
+    translate((float) arrowPos.x, (float) arrowPos.y);
+    rotate((float) arrowTheta);
+    image(arrow_img, 0, 0, 20, 40);
+    popMatrix();
+    if (shootArrow) update_arrow();
+  }
 
   for (int i = 0; i < 30; i++)
   water_particles.add(new WaterParticle(new Vec2(random(15), 40 + random(20))));
@@ -262,17 +267,4 @@ void draw() {
       it.remove();
     }
   }
-
-  if (arrowActivated || shootArrow) {
-    pushMatrix();
-    translate((float) arrowPos.x, (float) arrowPos.y);
-    rotate((float) arrowTheta);
-    image(arrow_img, 0, 0, 20, 40);
-    popMatrix();
-    if (shootArrow) update_arrow();
-  }
-
-  //Think
-  // Arrow through waterfall ? 
-  // Repel arrow when in rest ? 
 }
